@@ -1,0 +1,18 @@
+========================================================================
+MODEL: svm_gpu
+Best trial: 170
+Best F1 (val @ best-threshold): 0.7313
+Val AUC: 0.7857
+Val AP:  0.7881
+Best threshold (picked on val): 0.3849
+Model saved to: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/solubility/svm_gpu/best_model_cuml_svc.joblib
+Best params:
+{
+  "C": 0.0912913815676213,
+  "kernel": "poly",
+  "class_weight": null,
+  "max_iter": 220,
+  "tol": 9.602928773652895e-06,
+  "gamma": 0.09263590701074956
+}
+========================================================================

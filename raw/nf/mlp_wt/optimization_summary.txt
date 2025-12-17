@@ -1,0 +1,15 @@
+========================================================================
+MODEL: mlp
+Best Optuna AUC (objective): 0.7383
+Refit best AUC (val): 0.9367
+Refit best F1@thr (val): 0.7357 at thr=0.7039
+Best params:
+{
+  "lr": 0.0024035413894026624,
+  "weight_decay": 0.005100535489624252,
+  "dropout": 0.08148793900260112,
+  "batch_size": 16,
+  "hidden": 2048
+}
+Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/nf/mlp/best_model.pt
+========================================================================

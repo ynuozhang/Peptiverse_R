@@ -1,0 +1,17 @@
+========================================================================
+MODEL: enet_gpu
+Best trial: 176
+Best F1 (val @ best-threshold): 0.7309
+Val AUC: 0.9363
+Val AP:  0.7452
+Best threshold (picked on val): 0.3785
+Model saved to: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/nf/enet_gpu_wt/best_model_cuml_enet.joblib
+Best params:
+{
+  "C": 0.1359748983308114,
+  "l1_ratio": 0.06421916717273313,
+  "class_weight": null,
+  "max_iter": 3835,
+  "tol": 0.00035545128215830026
+}
+========================================================================

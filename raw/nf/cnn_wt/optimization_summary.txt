@@ -1,0 +1,17 @@
+========================================================================
+MODEL: cnn
+Best Optuna AUC (objective): 0.7360
+Refit best AUC (val): 0.9379
+Refit best F1@thr (val): 0.7300 at thr=0.7389
+Best params:
+{
+  "lr": 0.0013782156528225785,
+  "weight_decay": 0.005324752023476819,
+  "dropout": 0.13756653816776498,
+  "batch_size": 32,
+  "channels": 128,
+  "kernel": 7,
+  "layers": 2
+}
+Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/nf/cnn/best_model.pt
+========================================================================

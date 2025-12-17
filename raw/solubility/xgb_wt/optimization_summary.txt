@@ -1,0 +1,22 @@
+========================================================================
+MODEL: xgb
+Best trial: 192
+Best F1 (val @ best-threshold): 0.7202
+Val AUC: 0.7756
+Val AP:  0.7864
+Best threshold (picked on val): 0.3745
+Model saved to: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/solubility/xgb/best_model.json
+Best params:
+{
+  "lambda": 1.6459321458161516e-08,
+  "alpha": 4.878391831208817e-07,
+  "colsample_bytree": 0.3965151840185689,
+  "subsample": 0.8490099617278252,
+  "learning_rate": 0.034021202545138976,
+  "max_depth": 11,
+  "min_child_weight": 41,
+  "gamma": 2.7130822461701403,
+  "num_boost_round": 757,
+  "early_stopping_rounds": 71
+}
+========================================================================

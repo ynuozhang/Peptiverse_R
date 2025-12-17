@@ -1,0 +1,180 @@
+ROOT <- rprojroot::find_rstudio_root_file()
+source(file.path(ROOT, "R", "plot_style.R"))
+
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(readr)
+  library(stringr)
+  library(scales)
+  library(dplyr)
+  library(grid)
+})
+IN_TRIALS <- "data_processed/trials_long.csv"
+OUT_DIR   <- "figures/supplement"
+dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
+
+# -----------------------------
+# Load trials
+# -----------------------------
+trials <- readr::read_csv(IN_TRIALS, show_col_types = FALSE) %>%
+  mutate(
+    task  = as.character(task),
+    model = as.character(model),
+    run   = as.character(run),
+    repr  = as.character(repr),
+    trial_index = as.integer(trial_index),
+    f1 = as.numeric(f1),
+    best_so_far = as.numeric(best_so_far)
+  )
+
+# Normalize repr a bit (in case NA or "")
+trials <- trials %>%
+  mutate(
+    repr = case_when(
+      is.na(repr) | repr == "" ~ "unspecified",
+      TRUE ~ tolower(repr)
+    )
+  )
+
+trials_plot <- trials_long %>%
+  mutate(
+    task_label = str_to_title(task),
+    repr_label = case_when(repr == "wt" ~ "WT",
+                           repr == "smiles" ~ "SMILES",
+                           TRUE ~ repr),
+    panel = paste0(task_label, " (", repr_label, ")")
+  )
+
+best_pts <- trials_plot %>%
+  group_by(task, repr, model, run) %>%
+  arrange(desc(f1), trial_index) %>%
+  slice(1) %>%
+  ungroup()
+# 2) float marker above the line + add arrow geometry
+y_offset <- 0.2  # adjust (0.02–0.06 usually good)
+
+best_pts2 <- best_pts %>%
+  mutate(
+    y_mark = pmin(f1 + y_offset, 0.995),   # float above, avoid clipping at 1.0
+    x_mark = trial_index
+  )
+# -----------------------------
+# Define the 5 panels you want
+# -----------------------------
+targets <- tribble(
+  ~panel_id, ~task_key,      ~repr_key,        ~panel_label,
+  "sol",     "solubility",   "any",            "Solubility (all repr)",
+  "hemo_wt", "hemolysis",    "wt",             "Hemolysis (WT)",
+  "hemo_sm", "hemolysis",    "smiles",         "Hemolysis (SMILES)",
+  "nf_wt",   "nonfouling",   "wt",             "Nonfouling (WT)",
+  "nf_sm",   "nonfouling",   "smiles",         "Nonfouling (SMILES)"
+)
+
+# Helper: match "task" robustly (in case folders are permeability_caco2 etc.)
+task_matches <- function(task_col, key) {
+  # exact match OR key contained in task string
+  task_col == key | str_detect(task_col, fixed(key, ignore_case = TRUE))
+}
+
+# Build each panel’s data; create placeholder if missing
+panel_dfs <- purrr::pmap_dfr(targets, function(panel_id, task_key, repr_key, panel_label) {
+  d <- trials %>%
+    filter(task_matches(task, task_key)) %>%
+    { if (repr_key == "any") . else filter(., repr == repr_key) } %>%
+    mutate(panel = panel_label)
+  
+  if (nrow(d) == 0) {
+    message(sprintf("[Supp S1] Missing data for: %s (task=%s, repr=%s) -> placeholder facet",
+                    panel_label, task_key, repr_key))
+    # placeholder row so facet exists
+    tibble(
+      task = task_key,
+      repr = repr_key,
+      model = "MISSING",
+      run = "MISSING",
+      trial_index = 0L,
+      f1 = NA_real_,
+      best_so_far = NA_real_,
+      auc = NA_real_,
+      ap = NA_real_,
+      threshold = NA_real_,
+      panel = panel_label
+    )
+  } else {
+    d
+  }
+})
+
+# Ensure consistent facet order
+panel_dfs <- panel_dfs %>%
+  mutate(panel = factor(panel, levels = targets$panel_label))
+
+# -----------------------------
+# Plot: raw F1 (light) + best-so-far (bold)
+# -----------------------------
+# Make a panel label like "Nonfouling (WT)" etc.
+trials_plot <- trials_long %>%
+  mutate(
+    task_label = str_to_title(task),
+    repr_label = case_when(repr == "wt" ~ "WT",
+                           repr == "smiles" ~ "SMILES",
+                           TRUE ~ repr),
+    panel = paste0(task_label, " (", repr_label, ")")
+  )
+
+
+p <- ggplot(trials_plot, aes(
+  trial_index, f1,
+  group = interaction(task, repr, model, run),
+  color = model
+)) +
+  geom_line(linewidth = 0.3, alpha = 0.25) +
+  
+  # Arrow from floating marker down to the best trial point
+  geom_segment(
+    data = best_pts2,
+    aes(x = x_mark, xend = trial_index, y = y_mark, yend = f1, color = model),
+    inherit.aes = FALSE,
+    linewidth = 0.35,
+    arrow = arrow(length = unit(0.10, "inches"), type = "closed")
+  ) +
+  
+  # Black outline (bigger)
+  geom_point(
+    data = best_pts2,
+    aes(x = x_mark, y = y_mark),
+    inherit.aes = FALSE,
+    shape = 4,      # triangle (reads well); swap to 8 if you insist on asterisk
+    size = 3.2,
+    color = "black"
+  ) +
+  # Colored marker (smaller) on top — uses same color as the line
+  geom_point(
+    data = best_pts2,
+    aes(x = x_mark, y = y_mark, color = model),
+    inherit.aes = FALSE,
+    shape = 4,
+    size = 2.5
+  ) +
+  
+  facet_wrap(~ panel, ncol = 2, scales = "free_x") +
+  scale_color_manual(values = PAL_MODEL, drop = FALSE) +
+  scale_y_continuous(limits = c(0, 1),
+                     labels = scales::number_format(accuracy = 0.01)) +
+  labs(
+    x = "Optuna trial index",
+    y = "F1 (val)",
+    title = "Supplement S1: Optuna optimization traces (F1 vs trial)",
+    subtitle = "Outlined marker floats above the best trial; arrow points to the selected trial"
+  )
+
+print(p)
+
+out_png <- file.path(OUT_DIR, "supp_S1_f1_vs_trial.png")
+ggsave(out_png, p, width = 11, height = 8, dpi = 300)
+message("Saved: ", out_png)
+
+# Optional PDF for paper submission
+out_pdf <- file.path(OUT_DIR, "supp_S1_f1_vs_trial.pdf")
+ggsave(out_pdf, p, width = 11, height = 8)
+message("Saved: ", out_pdf)

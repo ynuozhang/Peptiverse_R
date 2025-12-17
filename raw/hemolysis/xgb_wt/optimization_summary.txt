@@ -1,0 +1,22 @@
+========================================================================
+MODEL: xgb
+Best trial: 181
+Best F1 (val @ best-threshold): 0.5644
+Val AUC: 0.7953
+Val AP:  0.5300
+Best threshold (picked on val): 0.2801
+Model saved to: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/hemolysis/xgb_wt/best_model.json
+Best params:
+{
+  "lambda": 0.0007363518713389432,
+  "alpha": 0.0012369788404414809,
+  "colsample_bytree": 0.8482972831459356,
+  "subsample": 0.819620739140391,
+  "learning_rate": 0.010997603392327322,
+  "max_depth": 13,
+  "min_child_weight": 55,
+  "gamma": 0.2671071148320312,
+  "num_boost_round": 1048,
+  "early_stopping_rounds": 40
+}
+========================================================================
