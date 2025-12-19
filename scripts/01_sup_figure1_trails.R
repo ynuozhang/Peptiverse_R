@@ -12,7 +12,20 @@ suppressPackageStartupMessages({
 IN_TRIALS <- "data_processed/trials_long.csv"
 OUT_DIR   <- "figures/supplement"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
-
+clean_model_label <- function(x) {
+  x <- tolower(x)
+  x <- str_remove(x, "_gpu$")
+  
+  dplyr::case_when(
+    str_detect(x, "^xgb$|xgboost") ~ "XGB",
+    str_detect(x, "svm")          ~ "SVM",
+    str_detect(x, "enet|elastic") ~ "ENET",
+    str_detect(x, "mlp")          ~ "MLP",
+    str_detect(x, "cnn")          ~ "CNN",
+    str_detect(x, "transformer|bert|esm") ~ "Transformer",
+    TRUE ~ str_to_title(x)
+  )
+}
 # -----------------------------
 # Load trials
 # -----------------------------
@@ -36,28 +49,30 @@ trials <- trials %>%
     )
   )
 
-trials_plot <- trials_long %>%
+# 2) float marker above the line + add arrow geometry
+y_offset <- 0.2  # adjust (0.02–0.06 usually good)
+# build plotting df ONCE
+trials_plot <- trials %>%
   mutate(
     task_label = str_to_title(task),
     repr_label = case_when(repr == "wt" ~ "WT",
                            repr == "smiles" ~ "SMILES",
                            TRUE ~ repr),
-    panel = paste0(task_label, " (", repr_label, ")")
+    panel = paste0(task_label, " (", repr_label, ")"),
+    model_lbl = clean_model_label(model)
   )
-
 best_pts <- trials_plot %>%
   group_by(task, repr, model, run) %>%
   arrange(desc(f1), trial_index) %>%
   slice(1) %>%
   ungroup()
-# 2) float marker above the line + add arrow geometry
-y_offset <- 0.2  # adjust (0.02–0.06 usually good)
-
 best_pts2 <- best_pts %>%
   mutate(
     y_mark = pmin(f1 + y_offset, 0.995),   # float above, avoid clipping at 1.0
     x_mark = trial_index
   )
+# best points df must also have model_lbl
+
 # -----------------------------
 # Define the 5 panels you want
 # -----------------------------
@@ -69,7 +84,23 @@ targets <- tribble(
   "nf_wt",   "nonfouling",   "wt",             "Nonfouling (WT)",
   "nf_sm",   "nonfouling",   "smiles",         "Nonfouling (SMILES)"
 )
-
+MODEL_ORDER <- c("XGB", "ENET", "SVM", "MLP", "CNN", "Transformer")
+best_pts2 <- best_pts2 %>%
+  mutate(model_lbl = clean_model_label(model))
+trials_plot <- trials_plot %>%
+  mutate(
+    model_lbl = factor(
+      clean_model_label(model),
+      levels = MODEL_ORDER
+    )
+  )
+best_pts2 <- best_pts2 %>%
+  mutate(
+    model_lbl = factor(
+      clean_model_label(model),
+      levels = MODEL_ORDER
+    )
+  )
 # Helper: match "task" robustly (in case folders are permeability_caco2 etc.)
 task_matches <- function(task_col, key) {
   # exact match OR key contained in task string
@@ -113,68 +144,54 @@ panel_dfs <- panel_dfs %>%
 # Plot: raw F1 (light) + best-so-far (bold)
 # -----------------------------
 # Make a panel label like "Nonfouling (WT)" etc.
-trials_plot <- trials_long %>%
-  mutate(
-    task_label = str_to_title(task),
-    repr_label = case_when(repr == "wt" ~ "WT",
-                           repr == "smiles" ~ "SMILES",
-                           TRUE ~ repr),
-    panel = paste0(task_label, " (", repr_label, ")")
-  )
-
 
 p <- ggplot(trials_plot, aes(
   trial_index, f1,
   group = interaction(task, repr, model, run),
-  color = model
+  color = model_lbl
 )) +
-  geom_line(linewidth = 0.3, alpha = 0.25) +
+  geom_line(linewidth = 0.6, alpha = 0.35) +
   
-  # Arrow from floating marker down to the best trial point
+  # arrow only; do NOT show in legend
   geom_segment(
     data = best_pts2,
-    aes(x = x_mark, xend = trial_index, y = y_mark, yend = f1, color = model),
+    aes(x = x_mark, xend = trial_index, y = y_mark, yend = f1, color = model_lbl),
     inherit.aes = FALSE,
-    linewidth = 0.35,
-    arrow = arrow(length = unit(0.10, "inches"), type = "closed")
-  ) +
-  
-  # Black outline (bigger)
-  geom_point(
-    data = best_pts2,
-    aes(x = x_mark, y = y_mark),
-    inherit.aes = FALSE,
-    shape = 4,      # triangle (reads well); swap to 8 if you insist on asterisk
-    size = 3.2,
-    color = "black"
-  ) +
-  # Colored marker (smaller) on top — uses same color as the line
-  geom_point(
-    data = best_pts2,
-    aes(x = x_mark, y = y_mark, color = model),
-    inherit.aes = FALSE,
-    shape = 4,
-    size = 2.5
+    linewidth = 0.4,
+    arrow = grid::arrow(length = grid::unit(0.10, "inches"), type = "closed"),
+    show.legend = FALSE
   ) +
   
   facet_wrap(~ panel, ncol = 2, scales = "free_x") +
+  
   scale_color_manual(values = PAL_MODEL, drop = FALSE) +
-  scale_y_continuous(limits = c(0, 1),
-                     labels = scales::number_format(accuracy = 0.01)) +
+  
+  guides(
+    color = guide_legend(
+      override.aes = list(linewidth = 1.8, alpha = 1, linetype = 1),
+      nrow = 1
+    )
+  ) +
+  
+  scale_y_continuous(
+    limits = c(0, 1),
+    labels = scales::number_format(accuracy = 0.01)
+  ) +
   labs(
     x = "Optuna trial index",
     y = "F1 (val)",
     title = "Supplement S1: Optuna optimization traces (F1 vs trial)",
-    subtitle = "Outlined marker floats above the best trial; arrow points to the selected trial"
+    #subtitle = "Arrow marks the selected best-F1 trial per run"
   )
+
 
 print(p)
 
 out_png <- file.path(OUT_DIR, "supp_S1_f1_vs_trial.png")
-ggsave(out_png, p, width = 11, height = 8, dpi = 300)
+ggsave(out_png, p, width = 10, height = 8, dpi = 500)
 message("Saved: ", out_png)
 
 # Optional PDF for paper submission
 out_pdf <- file.path(OUT_DIR, "supp_S1_f1_vs_trial.pdf")
-ggsave(out_pdf, p, width = 11, height = 8)
+ggsave(out_pdf, p, width = 20, height = 16)
 message("Saved: ", out_pdf)
