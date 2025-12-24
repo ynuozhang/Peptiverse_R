@@ -75,50 +75,78 @@ parse_meta_from_path <- function(path, raw_dir) {
 
 # Safe metric computations from y_true / y_prob / y_pred
 compute_metrics_from_preds <- function(df) {
-  # expects y_true, y_prob, y_pred columns
-  df <- df %>%
-    mutate(
-      y_true = as.integer(y_true),
-      y_pred = as.integer(y_pred),
-      y_prob = as.numeric(y_prob)
+  nms <- names(df)
+  
+  # -------- find y_true ----------
+  y_true_col <- intersect(nms, c("y_true", "y", "label", "target"))[1]
+  if (is.na(y_true_col)) {
+    stop("Missing y_true column. Expected one of: y_true, y, label, target")
+  }
+  y_true <- suppressWarnings(as.numeric(df[[y_true_col]]))
+  
+  # -------- find prediction columns ----------
+  prob_col <- intersect(nms, c("y_prob", "prob", "p", "p_hat", "pred_prob", ".pred_1"))[1]
+  pred_col <- intersect(nms, c("y_pred", "pred", "y_hat", "prediction", "pred_mean"))[1]
+  
+  y_prob <- if (!is.na(prob_col)) suppressWarnings(as.numeric(df[[prob_col]])) else NA_real_
+  y_pred <- if (!is.na(pred_col)) suppressWarnings(as.numeric(df[[pred_col]])) else NA_real_
+  
+  # -------- decide classification vs regression ----------
+  # classification if y_true is 0/1 AND we have probabilities
+  is_binary <- all(na.omit(y_true) %in% c(0, 1)) && !is.na(prob_col)
+  
+  if (is_binary) {
+    # if y_pred isn't present, derive it from prob at 0.5 (or change threshold logic if you store it)
+    if (is.na(pred_col)) {
+      y_hat <- as.integer(y_prob >= 0.5)
+    } else {
+      y_hat <- as.integer(y_pred)
+    }
+    
+    d <- tibble::tibble(
+      truth    = factor(as.integer(y_true), levels = c(0, 1)),
+      estimate = factor(y_hat, levels = c(0, 1)),
+      .pred_1  = y_prob
     )
-  
-  # yardstick wants factors for class metrics
-  d <- df %>%
-    transmute(
-      truth = factor(y_true, levels = c(0,1)),
-      estimate = factor(y_pred, levels = c(0,1)),
-      .pred_1 = y_prob
+    
+    has_both <- dplyr::n_distinct(d$truth) == 2
+    
+    out <- list(
+      f1       = tryCatch(yardstick::f_meas(d, truth, estimate, beta = 1)$.estimate, error = function(e) NA_real_),
+      accuracy = tryCatch(yardstick::accuracy(d, truth, estimate)$.estimate,         error = function(e) NA_real_),
+      mcc      = tryCatch(yardstick::mcc(d, truth, estimate)$.estimate,              error = function(e) NA_real_)
     )
-  
-  # Handle edge cases: AUC/AUPRC require both classes present
-  has_both <- n_distinct(d$truth) == 2
-  
-  out <- list(
-    f1       = tryCatch(f_meas(d, truth, estimate, beta = 1)$.estimate, error = function(e) NA_real_),
-    accuracy = tryCatch(accuracy(d, truth, estimate)$.estimate,          error = function(e) NA_real_),
-    mcc      = tryCatch(mcc(d, truth, estimate)$.estimate,               error = function(e) NA_real_)
-  )
-  
-  if (has_both) {
-    out$roc_auc <- tryCatch(roc_auc(d, truth, .pred_1)$.estimate, error = function(e) NA_real_)
-    out$auprc   <- tryCatch(pr_auc(d, truth, .pred_1)$.estimate,  error = function(e) NA_real_)
-  } else {
-    out$roc_auc <- NA_real_
-    out$auprc   <- NA_real_
+    
+    if (has_both) {
+      out$roc_auc <- tryCatch(yardstick::roc_auc(d, truth, .pred_1)$.estimate, error = function(e) NA_real_)
+      out$auprc   <- tryCatch(yardstick::pr_auc(d, truth, .pred_1)$.estimate,  error = function(e) NA_real_)
+    } else {
+      out$roc_auc <- NA_real_
+      out$auprc   <- NA_real_
+    }
+    
+    return(tibble::tibble(metric = names(out), value = as.numeric(out)))
   }
   
-  tibble(metric = names(out), value = as.numeric(out))
+  # -------- regression branch ----------
+  if (is.na(pred_col)) {
+    stop("Regression preds: missing prediction column. Expected one of: y_pred, pred, y_hat, prediction, pred_mean")
+  }
+  
+  # basic regression metrics + Spearman rho
+  ok <- is.finite(y_true) & is.finite(y_pred)
+  yt <- y_true[ok]; yp <- y_pred[ok]
+  
+  rho  <- suppressWarnings(cor(yt, yp, method = "spearman"))
+  rmse <- sqrt(mean((yt - yp)^2))
+  mae  <- mean(abs(yt - yp))
+  
+  tibble::tibble(
+    metric = c("spearman_rho", "rmse", "mae"),
+    value  = c(as.numeric(rho), as.numeric(rmse), as.numeric(mae))
+  )
 }
-# Extract "best threshold" if present in optimization_summary.txt
-read_threshold_from_summary <- function(path) {
-  txt <- readLines(path, warn = FALSE)
-  # looks like: "Best threshold (picked on val): 0.1234"
-  line <- txt[str_detect(txt, "Best threshold")]
-  if (length(line) == 0) return(NA_real_)
-  x <- str_extract(line[1], "[0-9]*\\.?[0-9]+")
-  as.numeric(x)
-}
+
 
 # Best-so-far curve from study_trials.csv
 make_best_so_far <- function(trials_df) {
@@ -195,15 +223,21 @@ write_csv(trials_long, file.path(OUT_DIR, "trials_long.csv"))
 # -------------------------
 # 3) Read + standardize predictions and compute metrics
 # -------------------------
+# -------------------------
+# 3) Read + standardize predictions and compute metrics
+# -------------------------
+# -------------------------
+# 3) Read + standardize predictions and compute metrics
+# -------------------------
 preds_meta <- purrr::map_dfr(pred_files, function(f) {
   meta <- parse_meta_from_path(f, RAW_DIR)
   split <- ifelse(str_detect(basename(f), "^train_"), "train", "val")
   meta %>% mutate(split = split)
 })
 
-# For each (task, model, run), we’ll compute metrics per split from predictions csv
+# For each (task, repr, model, run), compute metrics per split
 results_long <- preds_meta %>%
-  distinct(path, task, model, run, split) %>%
+  distinct(path, task, repr, model, run, split) %>%  # <-- keep repr
   mutate(
     metrics_tbl = purrr::map(path, function(f) {
       df <- read_csv_fast(f)
@@ -211,7 +245,50 @@ results_long <- preds_meta %>%
     })
   ) %>%
   unnest(metrics_tbl) %>%
-  arrange(task, model, run, split, metric)
+  arrange(task, repr, model, run, split, metric)
 
 write_csv(results_long, file.path(OUT_DIR, "results_long.csv"))
+
+# -------------------------
+# 4) Split outputs into classification vs regression CSVs
+# -------------------------
+
+results_long2 <- results_long %>% mutate(repr2 = dplyr::coalesce(repr, "unknown"))
+trials_long2  <- trials_long  %>% mutate(repr2 = dplyr::coalesce(repr, "unknown"))
+
+run_kind <- results_long2 %>%
+  group_by(task, repr2, model, run) %>%
+  summarise(
+    kind = dplyr::case_when(
+      any(metric %in% c("spearman_rho", "rmse", "mae")) ~ "regression",
+      any(metric %in% c("f1", "accuracy", "mcc", "roc_auc", "auprc")) ~ "classification",
+      TRUE ~ "unknown"
+    ),
+    .groups = "drop"
+  )
+
+results_classification <- results_long2 %>%
+  left_join(run_kind, by = c("task", "repr2", "model", "run")) %>%
+  filter(kind == "classification") %>%
+  select(-kind, -repr2)
+
+results_regression <- results_long2 %>%
+  left_join(run_kind, by = c("task", "repr2", "model", "run")) %>%
+  filter(kind == "regression") %>%
+  select(-kind, -repr2)
+
+trials_classification <- trials_long2 %>%
+  left_join(run_kind, by = c("task", "repr2", "model", "run")) %>%
+  filter(kind == "classification") %>%
+  select(-kind, -repr2)
+
+trials_regression <- trials_long2 %>%
+  left_join(run_kind, by = c("task", "repr2", "model", "run")) %>%
+  filter(kind == "regression") %>%
+  select(-kind, -repr2)
+
+write_csv(results_classification, file.path(OUT_DIR, "results_classification.csv"))
+write_csv(results_regression,     file.path(OUT_DIR, "results_regression.csv"))
+write_csv(trials_classification,  file.path(OUT_DIR, "trials_classification.csv"))
+write_csv(trials_regression,      file.path(OUT_DIR, "trials_regression.csv"))
 

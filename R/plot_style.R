@@ -9,15 +9,15 @@ suppressPackageStartupMessages({
 font_add_google("Ubuntu", "ubuntu")
 showtext_auto()
 theme_set(
-  theme_bw(base_size = 15, base_family = "ubuntu") +
+  theme_bw(base_size = 14, base_family = "ubuntu") +
     theme(
-      axis.text = element_text(size = 15),
-      axis.title = element_text(size = 20, face = "bold"),
+      axis.text = element_text(size = 14),
+      axis.title = element_text(size = 18, face = "bold"),
       panel.grid.major.x = element_blank(),
       panel.grid.minor = element_blank(),
       panel.grid.major.y = element_line(color = "grey90", linewidth = 0.3),
       strip.background = element_rect(fill = "#EDEDFD", color = NA),
-      strip.text = element_text(face = "bold", color = "#013FB1", size = 20),
+      strip.text = element_text(face = "bold", color = "#013FB1", size = 18),
       legend.position = "bottom",
       plot.title = element_blank(),
       legend.title = element_blank(),
@@ -41,3 +41,4 @@ PAL_MODEL <- c(
   "CNN" = "#8662be",
   "Transformer" = "#f25e96"
 )
+PAL_MODEL2 <- c(PAL_MODEL, "SVR" = PAL_MODEL[["SVM"]])
