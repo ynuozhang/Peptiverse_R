@@ -49,13 +49,11 @@ trials <- trials %>%
     )
   )
 
-# 2) float marker above the line + add arrow geometry
-y_offset <- 0.2  # adjust (0.02–0.06 usually good)
-# build plotting df ONCE
+y_offset <- 0.2 
 trials_plot <- trials %>%
   mutate(
     task_label = task %>%
-      str_replace_all("permeabilitypenetrance", "permeability_penetrance") %>%  # fix this name
+      str_replace_all("permeabilitypenetrance", "permeability_penetrance") %>% 
       str_replace_all("_", " ") %>%
       str_to_title() %>%
       str_replace_all(" ", "_"),
@@ -83,9 +81,6 @@ best_pts2 <- best_pts %>%
   )
 # best points df must also have model_lbl
 
-# -----------------------------
-# Define the 5 panels you want
-# -----------------------------
 targets <- tribble(
   ~panel_id, ~task_key,      ~repr_key,        ~panel_label,
   "sol",     "solubility",   "any",            "Solubility (all repr)",
@@ -113,13 +108,10 @@ best_pts2 <- best_pts2 %>%
       levels = MODEL_ORDER
     )
   )
-# Helper: match "task" robustly (in case folders are permeability_caco2 etc.)
 task_matches <- function(task_col, key) {
-  # exact match OR key contained in task string
   task_col == key | str_detect(task_col, fixed(key, ignore_case = TRUE))
 }
 
-# Build each panel’s data; create placeholder if missing
 panel_dfs <- purrr::pmap_dfr(targets, function(panel_id, task_key, repr_key, panel_label) {
   d <- trials %>%
     filter(task_matches(task, task_key)) %>%
@@ -129,7 +121,6 @@ panel_dfs <- purrr::pmap_dfr(targets, function(panel_id, task_key, repr_key, pan
   if (nrow(d) == 0) {
     message(sprintf("[Supp S1] Missing data for: %s (task=%s, repr=%s) -> placeholder facet",
                     panel_label, task_key, repr_key))
-    # placeholder row so facet exists
     tibble(
       task = task_key,
       repr = repr_key,
@@ -148,14 +139,12 @@ panel_dfs <- purrr::pmap_dfr(targets, function(panel_id, task_key, repr_key, pan
   }
 })
 
-# Ensure consistent facet order
 panel_dfs <- panel_dfs %>%
   mutate(panel = factor(panel, levels = targets$panel_label))
 
 # -----------------------------
 # Plot: raw F1 (light) + best-so-far (bold)
 # -----------------------------
-# Make a panel label like "Nonfouling (WT)" etc.
 
 p <- ggplot(trials_plot, aes(
   trial_index, f1,
@@ -164,7 +153,6 @@ p <- ggplot(trials_plot, aes(
 )) +
   geom_line(linewidth = 0.6, alpha = 0.35) +
   
-  # arrow only; do NOT show in legend
   geom_segment(
     data = best_pts2,
     aes(x = x_mark, xend = trial_index, y = y_mark, yend = f1, color = model_lbl),
@@ -192,8 +180,6 @@ p <- ggplot(trials_plot, aes(
   labs(
     x = "Optuna trial index",
     y = "F1 (val)",
-    title = "Supplement S1: Optuna optimization traces (F1 vs trial)",
-    #subtitle = "Arrow marks the selected best-F1 trial per run"
   )
 
 
@@ -238,12 +224,11 @@ task_matches <- function(task_col, key) {
 
 MODEL_ORDER <- c("XGB", "ENET", "SVM", "MLP", "CNN", "Transformer")
 
-y_offset <- 0.03  # rho scale; small offset works best
+y_offset <- 0.03
 
 trials_reg <- trials %>%
   filter(purrr::map_lgl(task, ~ any(purrr::map_lgl(REG_TASK_KEYS, task_matches, task_col = .x)))) %>%
   mutate(
-    # pretty task names (optional)
     task_label = task %>%
       stringr::str_replace_all("permeabilitypenetrance", "permeability_penetrance") %>%
       stringr::str_replace_all("_", " ") %>%

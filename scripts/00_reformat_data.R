@@ -7,7 +7,7 @@ suppressPackageStartupMessages({
 # -------------------------
 # Config
 # -------------------------
-RAW_DIR  <- "raw"         # where you untar the server results
+RAW_DIR  <- "raw"
 OUT_DIR  <- "data_processed"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 read_csv_fast <- function(path) {
@@ -16,7 +16,6 @@ read_csv_fast <- function(path) {
 
 # Parse task/model from the file path.
 # Assumes structure like: .../<task>/<model_or_run>/<file>
-# If your folder layout differs, this still gives useful defaults.
 parse_meta_from_path <- function(path, raw_dir) {
   p <- normalizePath(path, winslash = "/", mustWork = FALSE)
   r <- normalizePath(raw_dir, winslash = "/", mustWork = FALSE)
@@ -34,6 +33,7 @@ parse_meta_from_path <- function(path, raw_dir) {
   # normalize task names
   task <- dplyr::case_when(
     task_l %in% c("nf", "nonfouling", "non_fouling", "non-fouling", "nonfoul") ~ "nonfouling",
+    task_l %in% c("halflife", "half_life", "half-life", "t12") ~ "halflife",
     TRUE ~ str_replace_all(task_l, "[^a-z0-9]+", "")
   )
   
@@ -72,7 +72,6 @@ parse_meta_from_path <- function(path, raw_dir) {
 }
 
 
-
 # Safe metric computations from y_true / y_prob / y_pred
 compute_metrics_from_preds <- function(df) {
   nms <- names(df)
@@ -96,7 +95,6 @@ compute_metrics_from_preds <- function(df) {
   is_binary <- all(na.omit(y_true) %in% c(0, 1)) && !is.na(prob_col)
   
   if (is_binary) {
-    # if y_pred isn't present, derive it from prob at 0.5 (or change threshold logic if you store it)
     if (is.na(pred_col)) {
       y_hat <- as.integer(y_prob >= 0.5)
     } else {
@@ -150,33 +148,37 @@ compute_metrics_from_preds <- function(df) {
 
 # Best-so-far curve from study_trials.csv
 make_best_so_far <- function(trials_df) {
-  # optuna trials_dataframe() often has columns:
-  # number, value, params_..., user_attrs_threshold, user_attrs_auc, user_attrs_ap
-  # Sometimes trial index is "number" or "trial_number"
+  # trial index column
   idx_col <- dplyr::case_when(
     "number" %in% names(trials_df) ~ "number",
     "trial_number" %in% names(trials_df) ~ "trial_number",
     TRUE ~ names(trials_df)[1]
   )
   
-  val_col <- dplyr::case_when(
+  # choose what should populate "f1"
+  # priority: explicit CV spearman (half-life XGB), else Optuna "value"
+  score_col <- dplyr::case_when(
+    "user_attrs_cv_spearman_rho" %in% names(trials_df) ~ "user_attrs_cv_spearman_rho",
     "value" %in% names(trials_df) ~ "value",
     TRUE ~ NA_character_
   )
   
-  if (is.na(val_col)) {
+  if (is.na(score_col)) {
     trials_df <- trials_df %>% mutate(value = NA_real_)
-    val_col <- "value"
+    score_col <- "value"
   }
   
   trials_df %>%
     arrange(.data[[idx_col]]) %>%
     mutate(
       trial_index = as.integer(.data[[idx_col]]),
-      f1 = as.numeric(.data[[val_col]]),
+      # keep the column name f1 for compatibility (even if it's rho)
+      f1 = as.numeric(.data[[score_col]]),
       best_so_far = cummax(replace_na(f1, -Inf))
     )
 }
+
+
 
 # -------------------------
 # 1) Discover files
@@ -199,33 +201,34 @@ trials_long <- purrr::map_dfr(study_files, function(f) {
   
   df2 <- make_best_so_far(df)
   
-  # optional: carry auc/ap if optuna stored as user attrs
-  # these columns usually are named like "user_attrs_auc", "user_attrs_ap", "user_attrs_threshold"
+  # carry auc/ap if optuna stored as user attrs
   auc_col <- names(df2)[str_detect(names(df2), "user_attrs.*auc")]
   ap_col  <- names(df2)[str_detect(names(df2), "user_attrs.*ap")]
   thr_col <- names(df2)[str_detect(names(df2), "user_attrs.*threshold")]
   
+  kind_hint <- if (any(str_detect(names(df), "^user_attrs_cv_(spearman_rho|rmse|mae|r2)$"))) {
+    "regression"
+  } else {
+    NA_character_
+  }
+  
   df2 %>%
     mutate(
       task  = meta$task,
-      repr  = meta$repr,   # <-- add this
+      repr  = meta$repr,
       model = meta$model,
       run   = meta$run,
+      kind_hint = kind_hint,
       auc = if (length(auc_col) > 0) as.numeric(df2[[auc_col[1]]]) else NA_real_,
       ap  = if (length(ap_col)  > 0) as.numeric(df2[[ap_col[1]]])  else NA_real_,
       threshold = if (length(thr_col) > 0) as.numeric(df2[[thr_col[1]]]) else NA_real_
     ) %>%
-    select(task, repr, model, run, trial_index, f1, best_so_far, auc, ap, threshold)
+    select(task, repr, model, run, trial_index, f1, best_so_far, auc, ap, threshold, kind_hint)
+  
 })
 
 write_csv(trials_long, file.path(OUT_DIR, "trials_long.csv"))
 
-# -------------------------
-# 3) Read + standardize predictions and compute metrics
-# -------------------------
-# -------------------------
-# 3) Read + standardize predictions and compute metrics
-# -------------------------
 # -------------------------
 # 3) Read + standardize predictions and compute metrics
 # -------------------------
@@ -237,7 +240,7 @@ preds_meta <- purrr::map_dfr(pred_files, function(f) {
 
 # For each (task, repr, model, run), compute metrics per split
 results_long <- preds_meta %>%
-  distinct(path, task, repr, model, run, split) %>%  # <-- keep repr
+  distinct(path, task, repr, model, run, split) %>% 
   mutate(
     metrics_tbl = purrr::map(path, function(f) {
       df <- read_csv_fast(f)
@@ -256,15 +259,32 @@ write_csv(results_long, file.path(OUT_DIR, "results_long.csv"))
 results_long2 <- results_long %>% mutate(repr2 = dplyr::coalesce(repr, "unknown"))
 trials_long2  <- trials_long  %>% mutate(repr2 = dplyr::coalesce(repr, "unknown"))
 
-run_kind <- results_long2 %>%
+kind_from_results <- results_long2 %>%
   group_by(task, repr2, model, run) %>%
   summarise(
     kind = dplyr::case_when(
       any(metric %in% c("spearman_rho", "rmse", "mae")) ~ "regression",
       any(metric %in% c("f1", "accuracy", "mcc", "roc_auc", "auprc")) ~ "classification",
-      TRUE ~ "unknown"
+      TRUE ~ NA_character_
     ),
     .groups = "drop"
+  )
+
+kind_from_trials <- trials_long2 %>%
+  group_by(task, repr2, model, run) %>%
+  summarise(
+    kind = dplyr::first(stats::na.omit(kind_hint)),
+    .groups = "drop"
+  )
+
+run_kind <- dplyr::full_join(
+  kind_from_results, kind_from_trials,
+  by = c("task", "repr2", "model", "run"),
+  suffix = c("_res", "_trial")
+) %>%
+  transmute(
+    task, repr2, model, run,
+    kind = dplyr::coalesce(kind_res, kind_trial, "unknown")
   )
 
 results_classification <- results_long2 %>%
@@ -280,12 +300,13 @@ results_regression <- results_long2 %>%
 trials_classification <- trials_long2 %>%
   left_join(run_kind, by = c("task", "repr2", "model", "run")) %>%
   filter(kind == "classification") %>%
-  select(-kind, -repr2)
+  select(-kind, -repr2, -kind_hint)
 
 trials_regression <- trials_long2 %>%
   left_join(run_kind, by = c("task", "repr2", "model", "run")) %>%
   filter(kind == "regression") %>%
-  select(-kind, -repr2)
+  select(-kind, -repr2, -kind_hint)
+
 
 write_csv(results_classification, file.path(OUT_DIR, "results_classification.csv"))
 write_csv(results_regression,     file.path(OUT_DIR, "results_regression.csv"))
