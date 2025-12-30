@@ -178,16 +178,16 @@ continuous_jobs <- tribble(
   "Permeability (CACO2)",      file.path(ROOT,"permeability_caco2","caco2_meta_with_split.csv"),
   "split","Caco2",  list(c(-6)),       "Log Pexp",
   
-  "Binding affinity (WT)",     file.path(ROOT,"binding_affinity","binding_affinity_wt_meta_with_split.csv"),
+  "Binding affinity (Amino Acids)",     file.path(ROOT,"binding_affinity","binding_affinity_wt_meta_with_split.csv"),
   "split","affinity", list(c(7,9)),    "Affinity Score",
   
   "Binding affinity (SMILES)", file.path(ROOT,"binding_affinity","binding_affinity_smiles_meta_with_split.csv"),
   "split","affinity", list(c(7,9)),    "Affinity Score",
-  "Half-life (WT)",                 file.path(ROOT,"half_life","wt_halflife_merged_dedup.csv"),
+  "Half-life (Amino Acids)",                 file.path(ROOT,"half_life","wt_halflife_merged_dedup.csv"),
   NA,    "half_life_hours", list(numeric(0)), "Half-life (hours)",
   "Half-life (SMILES)",                 file.path(ROOT,"half_life","halflife_merged_dedup.csv"),
   NA,    "half_life_hours", list(numeric(0)), "Half-life (hours)",
-  "Stability (WT)", file.path(ROOT,"stability","stability_meta_with_split.csv"),
+  "Stability (Amino Acids)", file.path(ROOT,"stability","stability_meta_with_split.csv"),
   "split","label", list(numeric(0)),    "Score",
 
 )

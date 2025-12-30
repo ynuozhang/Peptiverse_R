@@ -1,10 +1,8 @@
 ROOT <- rprojroot::find_rstudio_root_file()
 source(file.path(ROOT, "R", "plot_style.R"))
-
 suppressPackageStartupMessages({
   library(tidyverse)
 })
-
 WT_CSV     <- "iptm_scatter_csv_all/wt_iptm_affinity_all.csv"
 SMILES_CSV <- "iptm_scatter_csv_all/smiles_iptm_affinity_all.csv"
 OUT_DIR    <- "iptm_scatter_csv_all/plots"
@@ -22,25 +20,47 @@ read_one <- function(path, branch) {
 }
 
 df <- bind_rows(
-  read_one(WT_CSV, "WT"),
+  read_one(WT_CSV, "Amino Acids"),
   read_one(SMILES_CSV, "SMILES")
 )
+
+# Vectorized function to format p-values (rounded to 3 decimal places)
+format_pval <- function(p) {
+  ifelse(p < 0.001, "<0.001", sprintf("%.3f", p))
+}
 
 stats <- df %>%
   group_by(branch) %>%
   summarise(
     n = n(),
-    pearson_r    = cor(iptm, affinity, method = "pearson"),
-    spearman_rho = cor(iptm, affinity, method = "spearman"),
-    r2_lm        = summary(lm(affinity ~ iptm, data = cur_data()))$r.squared,
+    # Pearson correlation with test
+    pearson_test = list(suppressWarnings(cor.test(iptm, affinity, method = "pearson"))),
+    pearson_r    = pearson_test[[1]]$estimate,
+    pearson_p    = pearson_test[[1]]$p.value,
+    # Spearman correlation with test 
+    spearman_test = list(suppressWarnings(cor.test(iptm, affinity, method = "spearman"))),
+    spearman_rho  = spearman_test[[1]]$estimate,
+    spearman_p    = spearman_test[[1]]$p.value,
+    # Linear regression
+    lm_model     = list(lm(affinity ~ iptm, data = cur_data())),
+    r2_lm        = summary(lm_model[[1]])$r.squared,
+    lm_p         = summary(lm_model[[1]])$fstatistic %>% 
+      {pf(.[1], .[2], .[3], lower.tail = FALSE)},
     .groups = "drop"
   ) %>%
+  select(-pearson_test, -spearman_test, -lm_model) %>%
   mutate(
+    # Format with p-values rounded to 3 decimal places
     label = sprintf(
-      "N=%d\nPearson r=%.3f\nSpearman ρ=%.3f\nLinear regression R²=%.3f",
-      n, pearson_r, spearman_rho, r2_lm
+      "N=%d\nPearson r=%.3f (p=%s)\nSpearman ρ=%.3f (p=%s)\nLinear R²=%.3f (p=%s)",
+      n, 
+      pearson_r, format_pval(pearson_p),
+      spearman_rho, format_pval(spearman_p),
+      r2_lm, format_pval(lm_p)
     )
   )
+
+print(stats %>% select(branch, n, pearson_r, pearson_p, spearman_rho, spearman_p, r2_lm, lm_p))
 
 # ---- plot (facet WT vs SMILES) ----
 p <- ggplot(df, aes(x = iptm, y = affinity)) +
@@ -78,7 +98,7 @@ print(p)
 ggsave(file.path(OUT_DIR, "iptm_vs_affinity_facet.png"),
        p, width = 10, height = 4.2, dpi = 300)
 
-
+# Individual plots
 for (b in unique(df$branch)) {
   d  <- df %>% filter(branch == b)
   st <- stats %>% filter(branch == b)

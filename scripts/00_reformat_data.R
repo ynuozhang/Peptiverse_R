@@ -74,6 +74,10 @@ parse_meta_from_path <- function(path, raw_dir) {
 
 # Safe metric computations from y_true / y_prob / y_pred
 compute_metrics_from_preds <- function(df) {
+  # normalize header names (handles BOM + whitespace)
+  names(df) <- names(df) %>%
+    stringr::str_replace("^\ufeff", "") %>%  # remove BOM if present
+    stringr::str_trim()
   nms <- names(df)
   
   # -------- find y_true ----------
@@ -184,7 +188,18 @@ make_best_so_far <- function(trials_df) {
 # 1) Discover files
 # -------------------------
 study_files <- list.files(RAW_DIR, pattern = "study_trials\\.csv$", recursive = TRUE, full.names = TRUE)
-pred_files  <- list.files(RAW_DIR, pattern = "(train|val)_predictions\\.csv$", recursive = TRUE, full.names = TRUE)
+pred_files <- list.files(
+  RAW_DIR,
+  pattern = "((train|val)_predictions|oof_predictions)\\.csv$",
+  recursive = TRUE,
+  full.names = TRUE
+)
+# Exclude half-life SMILES prediction files (schema differs, and we don't use them here)
+pred_files <- pred_files[!(
+  str_detect(tolower(pred_files), "(^|/)half_life(/|$)") &
+    str_detect(tolower(pred_files), "(^|/)([^/]*smiles[^/]*)/")  # run folder contains "smiles"
+)]
+
 sum_files   <- list.files(RAW_DIR, pattern = "optimization_summary\\.txt$", recursive = TRUE, full.names = TRUE)
 
 message("Found: ",
@@ -206,7 +221,9 @@ trials_long <- purrr::map_dfr(study_files, function(f) {
   ap_col  <- names(df2)[str_detect(names(df2), "user_attrs.*ap")]
   thr_col <- names(df2)[str_detect(names(df2), "user_attrs.*threshold")]
   
-  kind_hint <- if (any(str_detect(names(df), "^user_attrs_cv_(spearman_rho|rmse|mae|r2)$"))) {
+  kind_hint <- if (!is.na(meta$task) && meta$task == "halflife") {
+    "regression"
+  } else if (any(str_detect(names(df), "^user_attrs_cv_(spearman_rho|rmse|mae|r2)$"))) {
     "regression"
   } else {
     NA_character_
@@ -234,7 +251,12 @@ write_csv(trials_long, file.path(OUT_DIR, "trials_long.csv"))
 # -------------------------
 preds_meta <- purrr::map_dfr(pred_files, function(f) {
   meta <- parse_meta_from_path(f, RAW_DIR)
-  split <- ifelse(str_detect(basename(f), "^train_"), "train", "val")
+  split <- dplyr::case_when(
+    str_detect(basename(f), "^train_") ~ "train",
+    str_detect(basename(f), "^val_")   ~ "val",
+    str_detect(basename(f), "^oof_") | basename(f) == "oof_predictions.csv" ~ "oof",
+    TRUE ~ "unknown"
+  )
   meta %>% mutate(split = split)
 })
 
@@ -243,12 +265,14 @@ results_long <- preds_meta %>%
   distinct(path, task, repr, model, run, split) %>% 
   mutate(
     metrics_tbl = purrr::map(path, function(f) {
+      message("METRICS FILE: ", f)
       df <- read_csv_fast(f)
       compute_metrics_from_preds(df)
     })
   ) %>%
   unnest(metrics_tbl) %>%
   arrange(task, repr, model, run, split, metric)
+
 
 write_csv(results_long, file.path(OUT_DIR, "results_long.csv"))
 

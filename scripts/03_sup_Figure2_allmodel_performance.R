@@ -37,7 +37,7 @@ clean_model_label <- function(x) {
 prop_spec <- tribble(
   ~prop,        ~task_key,        ~include_wt, ~include_smiles, ~placeholder_ok,
   "Hemolysis",  "hemolysis",      TRUE,        TRUE,            TRUE,
-  "Nonfouling", "nonfouling",     TRUE,        TRUE,            TRUE,
+  "Non-Fouling", "nonfouling",     TRUE,        TRUE,            TRUE,
   "Toxicity",   "toxicity",       FALSE,       TRUE,            TRUE,
   "Solubility", "solubility",     TRUE,        FALSE,           FALSE,
   "Permeability","permeabilitypenetrance",  TRUE,        FALSE,           TRUE
@@ -168,7 +168,7 @@ metrics_plot <- metrics_sum %>%
   mutate(
     metric    = factor(metric, levels = ALL_METRICS),
     model_lbl = factor(model_lbl, levels = MODEL_ORDER),
-    repr      = factor(repr, levels = ALL_REPR, labels = c("WT","SMILES"))
+    repr      = factor(repr, levels = ALL_REPR, labels = c("Amino Acids","SMILES"))
   ) %>%
   tidyr::complete(
     task,
@@ -190,7 +190,7 @@ metrics_plot_named <- metrics_plot %>%
     prop = factor(prop, levels = PROP_ORDER)
   ) %>%
   filter(
-    (repr == "WT"     & include_wt) |
+    (repr == "Amino Acids"     & include_wt) |
       (repr == "SMILES" & include_smiles)
   )
 

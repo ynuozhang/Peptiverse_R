@@ -36,18 +36,23 @@ BA_TRIALS <- "data_processed/binding_affinity_trials_long.csv"
 
 if (file.exists(BA_TRIALS)) {
   ba <- readr::read_csv(BA_TRIALS, show_col_types = FALSE) %>%
+    mutate(setting_l = tolower(setting)) %>%
     transmute(
       task = "binding_affinity",
-      repr = dplyr::coalesce(repr, "unspecified"),
-      model = "transformer",          # force transformer
-      run = dplyr::coalesce(run, "binding_affinity"),
+      repr = case_when(
+        str_detect(setting_l, "wt_smiles") ~ "smiles",
+        str_detect(setting_l, "wt_wt")     ~ "wt",
+        TRUE ~ NA_character_
+      ),
+      model = "transformer",
+      run = coalesce(run, "binding_affinity"),
       trial_index = as.integer(trial_index),
-      f1 = as.numeric(rho),  
+      f1 = as.numeric(rho),
       best_so_far = as.numeric(best_so_far),
-      auc = NA_real_,
-      ap = NA_real_,
-      threshold = NA_real_
-    )
+      auc = NA_real_, ap = NA_real_, threshold = NA_real_
+    ) %>%
+    filter(!is.na(repr))   # keep only wt/smiles
+  
   
   trials <- bind_rows(trials, ba) %>%
     mutate(
@@ -63,6 +68,8 @@ if (file.exists(BA_TRIALS)) {
 clean_model_label <- function(x) {
   x <- tolower(x)
   x <- str_remove(x, "_gpu$")
+  x <- str_remove(x, "_log$")
+  x <- str_remove(x, "_raw$")
   
   dplyr::case_when(
     str_detect(x, "svr")          ~ "SVR",
@@ -126,16 +133,15 @@ targets <- tibble::tribble(
   ~panel_id, ~task_key,            ~repr_key, ~panel_label,
   "caco2_s", "permeabilitycaco2",  "smiles",  "Permeability_CACO2 (SMILES)",
   "pampa_s", "permeabilitypampa",  "smiles",  "Permeability_PAMPA (SMILES)",
-  "hl_s",    "halflife",           "wt",  "Half-life (WT)",
-  "ba_wt",   "bindingaffinity",    "wt",      "Binding_affinity (WT)",
-  "ba_s",    "bindingaffinity",    "smiles",  "Binding_affinity (SMILES)"
+  "hl_wt",   "halflife",           "wt",      "Half-Life (Amino Acids)",
+  "ba_all",  "bindingaffinity",    "any",     "Binding Affinity (Amino Acids+SMILES)"
 )
+
 
 panel_dfs <- purrr::pmap_dfr(targets, function(panel_id, task_key, repr_key, panel_label) {
   
-  d <- trials %>%
-    mutate(task_norm = str_replace_all(tolower(task), "[^a-z0-9]+", "")) %>%
-    filter(task_norm == task_key) %>%
+  d <- trials_reg %>%
+    filter(str_detect(task_norm, fixed(task_key))) %>%   # <-- robust
     { if (repr_key == "any") . else filter(., tolower(repr) == repr_key) } %>%
     mutate(panel = panel_label)
   
@@ -168,9 +174,7 @@ trials_plot <- panel_dfs %>%
   )
 trials_plot <- trials_plot %>%
   filter(
-    # Half-life: keep XGB only
-    !(str_detect(str_replace_all(tolower(task), "[^a-z0-9]+", ""), "halflife") &
-        model_lbl != "XGB"),
+
     # Binding affinity: keep Transformer only
     !(str_detect(str_replace_all(tolower(task), "[^a-z0-9]+", ""), "bindingaffinity") &
         model_lbl != "Transformer")

@@ -54,12 +54,13 @@ trials_plot <- trials %>%
   mutate(
     task_label = task %>%
       str_replace_all("permeabilitypenetrance", "permeability_penetrance") %>% 
+      str_replace_all("nonfouling", "non-fouling") %>% 
       str_replace_all("_", " ") %>%
       str_to_title() %>%
       str_replace_all(" ", "_"),
     
     repr_label = case_when(
-      repr == "wt" ~ "WT",
+      repr == "wt" ~ "Amino Acids",
       repr == "smiles" ~ "SMILES",
       TRUE ~ repr
     ),
@@ -84,9 +85,9 @@ best_pts2 <- best_pts %>%
 targets <- tribble(
   ~panel_id, ~task_key,      ~repr_key,        ~panel_label,
   "sol",     "solubility",   "any",            "Solubility (all repr)",
-  "hemo_wt", "hemolysis",    "wt",             "Hemolysis (WT)",
+  "hemo_wt", "hemolysis",    "wt",             "Hemolysis (Amino Acids)",
   "hemo_sm", "hemolysis",    "smiles",         "Hemolysis (SMILES)",
-  "nf_wt",   "nonfouling",   "wt",             "Nonfouling (WT)",
+  "nf_wt",   "nonfouling",   "wt",             "Nonfouling (Amino Acids)",
   "nf_sm",   "nonfouling",   "smiles",         "Nonfouling (SMILES)",
   "tox_wt",   "toxicity",   "smiles",         "Toxicity (SMILES)",
   "perm_wt",   "permeabilitypenetrance",   "wt",         "Permeability_penetrance (WT)"
@@ -194,103 +195,4 @@ out_pdf <- file.path(OUT_DIR, "supp_S1_f1_vs_trial.pdf")
 ggsave(out_pdf, p, width = 20, height = 16)
 message("Saved: ", out_pdf)
 
-
-# -----------------------------
-# Regression traces: Spearman rho vs trial
-# -----------------------------
-IN_TRIALS <- "data_processed/trials_long.csv"
-OUT_DIR   <- "figures/supplement"
-dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
-
-trials <- readr::read_csv(IN_TRIALS, show_col_types = FALSE) %>%
-  mutate(
-    task  = as.character(task),
-    model = as.character(model),
-    run   = as.character(run),
-    repr  = as.character(repr),
-    trial_index = as.integer(trial_index),
-    rho = as.numeric(rho)
-  ) %>%
-  mutate(
-    repr = case_when(is.na(repr) | repr == "" ~ "unspecified", TRUE ~ tolower(repr))
-  )
-
-# choose which regression tasks to include (edit this vector)
-REG_TASK_KEYS <- c("permeability_pampa", "permeability_caco2", "binding_affinity")
-
-task_matches <- function(task_col, key) {
-  task_col == key | stringr::str_detect(task_col, stringr::fixed(key, ignore_case = TRUE))
-}
-
-MODEL_ORDER <- c("XGB", "ENET", "SVM", "MLP", "CNN", "Transformer")
-
-y_offset <- 0.03
-
-trials_reg <- trials %>%
-  filter(purrr::map_lgl(task, ~ any(purrr::map_lgl(REG_TASK_KEYS, task_matches, task_col = .x)))) %>%
-  mutate(
-    task_label = task %>%
-      stringr::str_replace_all("permeabilitypenetrance", "permeability_penetrance") %>%
-      stringr::str_replace_all("_", " ") %>%
-      stringr::str_to_title() %>%
-      stringr::str_replace_all(" ", "_"),
-    repr_label = case_when(repr == "wt" ~ "WT",
-                           repr == "smiles" ~ "SMILES",
-                           TRUE ~ repr),
-    panel = paste0(task_label, " (", repr_label, ")"),
-    model_lbl = factor(clean_model_label(model), levels = MODEL_ORDER)
-  )
-
-best_pts <- trials_reg %>%
-  filter(!is.na(rho)) %>%
-  group_by(task, repr, model, run, panel, model_lbl) %>%
-  arrange(desc(rho), trial_index) %>%
-  slice(1) %>%
-  ungroup() %>%
-  mutate(
-    x_mark = trial_index,
-    y_mark = pmin(rho + y_offset, 0.995)  # clamp near top
-  )
-
-p_rho <- ggplot(trials_reg, aes(
-  trial_index, rho,
-  group = interaction(task, repr, model, run),
-  color = model_lbl
-)) +
-  geom_line(linewidth = 0.6, alpha = 0.35, na.rm = TRUE) +
-  geom_segment(
-    data = best_pts,
-    aes(x = x_mark, xend = trial_index, y = y_mark, yend = rho, color = model_lbl),
-    inherit.aes = FALSE,
-    linewidth = 0.4,
-    arrow = grid::arrow(length = grid::unit(0.10, "inches"), type = "closed"),
-    show.legend = FALSE,
-    na.rm = TRUE
-  ) +
-  facet_wrap(~ panel, ncol = 2, scales = "free_x") +
-  scale_color_manual(values = PAL_MODEL, drop = FALSE) +
-  guides(
-    color = guide_legend(
-      override.aes = list(linewidth = 1.8, alpha = 1, linetype = 1),
-      nrow = 1
-    )
-  ) +
-  scale_y_continuous(
-    limits = c(-1, 1),
-    breaks = seq(-1, 1, by = 0.5),
-    labels = scales::number_format(accuracy = 0.01)
-  ) +
-  labs(
-    x = "Optuna trial index",
-    y = "Spearman ρ (val)",
-    title = "Supplement S?: Optuna optimization traces (Spearman ρ vs trial)"
-  )
-
-print(p_rho)
-
-out_png <- file.path(OUT_DIR, "supp_S?_rho_vs_trial.png")
-ggsave(out_png, p_rho, width = 10, height = 8, dpi = 300)   # recommend 300
-
-out_pdf <- file.path(OUT_DIR, "supp_S?_rho_vs_trial.pdf")
-ggsave(out_pdf, p_rho, width = 20, height = 16)
 
