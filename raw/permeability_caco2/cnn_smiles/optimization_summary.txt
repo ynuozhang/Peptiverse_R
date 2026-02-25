@@ -1,0 +1,32 @@
+========================================================================
+MODEL: cnn
+OPTUNA objective: spearman (direction=maximize)
+Best trial: 16
+Best val metrics:
+{
+  "rmse": 1.3464045524597168,
+  "mae": 0.8111599683761597,
+  "r2": 0.18515795469284058,
+  "spearman_rho": 0.7157261392036586
+}
+Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/permeability_caco2/cnn_smiles/best_model.pt
+Best params:
+{
+  "lr": 0.000272851995406727,
+  "weight_decay": 3.0537910943840606e-05,
+  "dropout": 0.3058903047096042,
+  "batch_size": 16,
+  "channels": 128,
+  "kernel": 3,
+  "layers": 4,
+  "loss": "mse"
+}
+Benchmark (val):
+{
+  "n_samples": 122,
+  "wall_time_s": 0.496349481982179,
+  "throughput_samples_per_s": 245.79455490270928,
+  "gpu_ms_per_sample": 0.030315278494944337,
+  "gpu_peak_mem_MB": 42.23388671875
+}
+========================================================================

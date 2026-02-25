@@ -1,0 +1,16 @@
+========================================================================
+MODEL: svr
+Best trial: 113
+Val Spearman rho (objective): 0.543664
+Val RMSE:                      0.995698
+Val MAE:                       0.659567
+Val R2:                        0.210701
+Model saved to:                /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/permeability_pampa/svr_smiles/best_model_svr.joblib
+Best params:
+{
+  "kernel": "rbf",
+  "C": 1.0075732199290015,
+  "epsilon": 0.1071879771623696,
+  "gamma": 0.0032310931900553924
+}
+========================================================================

@@ -1,0 +1,22 @@
+========================================================================
+MODEL: xgb_reg
+Best trial: 167
+Val Spearman rho (objective): 0.677533
+Val RMSE:                      1.254866
+Val MAE:                       0.765150
+Val R2:                        0.292190
+Model saved to:                /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/permeability_caco2/xgb_reg_smiles/best_model.json
+Best params:
+{
+  "lambda": 0.3486277246320571,
+  "alpha": 1.6277577761049771e-09,
+  "gamma": 1.7505645262358933,
+  "max_depth": 6,
+  "min_child_weight": 18.76598880265753,
+  "subsample": 0.5056309327112477,
+  "colsample_bytree": 0.33244586290286915,
+  "learning_rate": 0.005274064669586765,
+  "num_boost_round": 1963,
+  "early_stopping_rounds": 91
+}
+========================================================================

@@ -1,0 +1,34 @@
+========================================================================
+MODEL: transformer
+OPTUNA objective: spearman (direction=maximize)
+Best trial: 48
+Best val metrics:
+{
+  "rmse": 1.325959324836731,
+  "mae": 0.9876185059547424,
+  "r2": -0.3997379541397095,
+  "spearman_rho": 0.5188368932984369
+}
+Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/permeability_pampa/transformer_smiles/best_model.pt
+Best params:
+{
+  "lr": 0.00011917339948801521,
+  "weight_decay": 3.2986244803228615e-10,
+  "dropout": 0.30269604826812774,
+  "batch_size": 16,
+  "d_model": 384,
+  "nhead": 4,
+  "layers": 4,
+  "ff": 256,
+  "loss": "huber",
+  "huber_delta": 0.7304856312863702
+}
+Benchmark (val):
+{
+  "n_samples": 800,
+  "wall_time_s": 3.1830900740460493,
+  "throughput_samples_per_s": 251.32810614533258,
+  "gpu_ms_per_sample": 0.15838967829942704,
+  "gpu_peak_mem_MB": 95.95947265625
+}
+========================================================================

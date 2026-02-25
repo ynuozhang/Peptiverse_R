@@ -1,0 +1,12 @@
+{
+  "lambda": 92.64756181438231,
+  "alpha": 0.015297631920801809,
+  "gamma": 1.4387034340159026,
+  "max_depth": 10,
+  "min_child_weight": 0.006459653169105161,
+  "subsample": 0.9643477511564937,
+  "colsample_bytree": 0.9676134986271061,
+  "learning_rate": 0.0152857988703679,
+  "num_boost_round": 1942,
+  "early_stopping_rounds": 150
+}

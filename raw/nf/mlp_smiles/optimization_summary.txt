@@ -1,0 +1,17 @@
+========================================================================
+MODEL: mlp
+Best Optuna F1 (objective): 0.7333
+Best Optuna AUC (val, recorded): 0.9364
+Best Optuna threshold (val): 0.6910
+Refit best AUC (val): 0.9364
+Refit best F1@thr (val): 0.7331 at thr=0.7702
+Best params:
+{
+  "lr": 0.0024839553405099526,
+  "weight_decay": 0.00018765939863473686,
+  "dropout": 0.2835159069937528,
+  "batch_size": 16,
+  "hidden": 1024
+}
+Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/nf/mlp_smiles_20/best_model.pt
+========================================================================

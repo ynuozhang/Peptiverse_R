@@ -1,0 +1,15 @@
+========================================================================
+MODEL: mlp
+Best Optuna AUC (objective): 0.9087
+Refit best AUC (val): 0.9590
+Refit best F1@thr (val): 0.9078 at thr=0.8393
+Best params:
+{
+  "lr": 0.0016146321628309815,
+  "weight_decay": 2.852382206601946e-08,
+  "dropout": 0.11865519727740499,
+  "batch_size": 32,
+  "hidden": 1024
+}
+Saved model: ../../penn_work/peptiverse/permeability/mlp_outputs/best_model.pt
+========================================================================

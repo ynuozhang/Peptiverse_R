@@ -1,0 +1,18 @@
+ ========================================================================
+MODEL: transformer
+Best Optuna AUC (objective): 0.9180
+Refit best AUC (val): 0.9634
+Refit best F1@thr (val): 0.9066 at thr=0.6363
+Best params:
+{
+  "lr": 0.0001271726814435562,
+  "weight_decay": 2.5794671760122145e-05,
+  "dropout": 0.18591584575569453,
+  "batch_size": 16,
+  "d_model": 384,
+  "nhead": 8,
+  "layers": 3,
+  "ff": 256
+}
+Saved model: ../../penn_work/peptiverse/permeability/transformer_outputs/best_model.pt
+========================================================================

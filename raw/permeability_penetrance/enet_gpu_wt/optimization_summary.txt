@@ -1,0 +1,17 @@
+========================================================================
+MODEL: enet_gpu
+Best trial: 55
+Best F1 (val @ best-threshold): 0.9052
+Val AUC: 0.9566
+Val AP:  0.9449
+Best threshold (picked on val): 0.3758
+Model saved to: ../../penn_work/peptiverse/permeability/enet_outputs/best_model_cuml_enet.joblib
+Best params:
+{
+  "C": 5.4606611625825305,
+  "l1_ratio": 0.026268494702099424,
+  "class_weight": "balanced",
+  "max_iter": 1564,
+  "tol": 1.5231156120802544e-06
+}
+========================================================================

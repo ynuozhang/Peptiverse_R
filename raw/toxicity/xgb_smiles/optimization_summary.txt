@@ -1,0 +1,22 @@
+========================================================================
+MODEL: xgb
+Best trial: 133
+Best F1 (val @ best-threshold): 0.8316
+Val AUC: 0.9028
+Val AP:  0.9289
+Best threshold (picked on val): 0.4022
+Model saved to: /scratch/pranamlab/tong/PeptiVerse/src/toxicity/xgb/best_model.json
+Best params:
+{
+  "lambda": 7.195384814491642e-08,
+  "alpha": 0.007810123529223898,
+  "colsample_bytree": 0.6080813477051401,
+  "subsample": 0.721852373529947,
+  "learning_rate": 0.02480873478388117,
+  "max_depth": 9,
+  "min_child_weight": 21,
+  "gamma": 0.3236634084950315,
+  "num_boost_round": 1427,
+  "early_stopping_rounds": 172
+}
+========================================================================

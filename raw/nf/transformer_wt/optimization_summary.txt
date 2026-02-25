@@ -1,18 +1,20 @@
 ========================================================================
 MODEL: transformer
-Best Optuna AUC (objective): 0.7436
-Refit best AUC (val): 0.9373
-Refit best F1@thr (val): 0.7317 at thr=0.8590
+Best Optuna F1 (objective): 0.7368
+Best Optuna AUC (val, recorded): 0.9325
+Best Optuna threshold (val): 0.7139
+Refit best AUC (val): 0.9376
+Refit best F1@thr (val): 0.7340 at thr=0.7404
 Best params:
 {
-  "lr": 0.0002196640292450867,
-  "weight_decay": 1.5742207714065975e-07,
-  "dropout": 0.16698447906986513,
-  "batch_size": 16,
+  "lr": 0.00015974003034251234,
+  "weight_decay": 5.37876200009511e-05,
+  "dropout": 0.0423574526357462,
+  "batch_size": 32,
   "d_model": 384,
-  "nhead": 4,
+  "nhead": 8,
   "layers": 2,
-  "ff": 256
+  "ff": 512
 }
-Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/nf/transformer/best_model.pt
+Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/nf/transformer_wt/best_model.pt
 ========================================================================

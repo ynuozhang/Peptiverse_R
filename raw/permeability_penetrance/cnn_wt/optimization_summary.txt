@@ -1,0 +1,17 @@
+========================================================================
+MODEL: cnn
+Best Optuna AUC (objective): 0.9279
+Refit best AUC (val): 0.9588
+Refit best F1@thr (val): 0.9163 at thr=0.9354
+Best params:
+{
+  "lr": 0.0006805038675719076,
+  "weight_decay": 3.828265226735556e-06,
+  "dropout": 0.14299889017563588,
+  "batch_size": 32,
+  "channels": 256,
+  "kernel": 7,
+  "layers": 2
+}
+Saved model: ../../penn_work/peptiverse/permeability/cnn_outputs/best_model.pt
+========================================================================

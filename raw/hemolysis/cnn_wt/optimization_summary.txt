@@ -1,0 +1,19 @@
+========================================================================
+MODEL: cnn
+Best Optuna F1 (objective): 0.5941
+Best Optuna AUC (val, recorded): 0.8296
+Best Optuna threshold (val): 0.3611
+Refit best AUC (val): 0.8329
+Refit best F1@thr (val): 0.5839 at thr=0.3541
+Best params:
+{
+  "lr": 0.0021319487228639196,
+  "weight_decay": 6.441336640623134e-07,
+  "dropout": 0.03652841298354735,
+  "batch_size": 16,
+  "channels": 128,
+  "kernel": 5,
+  "layers": 1
+}
+Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/hemolysis/cnn_wt/best_model.pt
+========================================================================

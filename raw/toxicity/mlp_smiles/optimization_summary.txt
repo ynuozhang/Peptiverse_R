@@ -1,0 +1,15 @@
+========================================================================
+MODEL: mlp
+Best Optuna AUC (objective): 0.8332
+Refit best AUC (val): 0.8952
+Refit best F1@thr (val): 0.8331 at thr=0.2232
+Best params:
+{
+  "lr": 0.0005597173946186976,
+  "weight_decay": 3.7905722588960598e-06,
+  "dropout": 0.06660440872607762,
+  "batch_size": 32,
+  "hidden": 1024
+}
+Saved model: /scratch/pranamlab/tong/PeptiVerse/src/toxicity/mlp_50/best_model.pt
+========================================================================

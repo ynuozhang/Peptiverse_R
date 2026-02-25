@@ -1,17 +1,17 @@
 ========================================================================
 MODEL: svm_gpu
-Best trial: 24
-Best F1 (val @ best-threshold): 0.8571
-Val AUC: 0.9997
-Val AP:  0.9026
-Best threshold (picked on val): 0.6049
+Best trial: 181
+Best F1 (val @ best-threshold): 0.7331
+Val AUC: 0.9355
+Val AP:  0.7410
+Best threshold (picked on val): 0.3528
 Model saved to: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/nf/svm_gpu_smiles/best_model_cuml_svc.joblib
 Best params:
 {
-  "C": 0.10906466430170589,
+  "C": 0.020224701969165627,
   "kernel": "linear",
-  "class_weight": "balanced",
-  "max_iter": 3651,
-  "tol": 0.004269674049824942
+  "class_weight": null,
+  "max_iter": 4017,
+  "tol": 3.344567276350287e-05
 }
 ========================================================================

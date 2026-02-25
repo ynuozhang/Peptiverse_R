@@ -1,0 +1,20 @@
+========================================================================
+MODEL: transformer
+Best Optuna F1 (objective): 0.5733
+Best Optuna AUC (val, recorded): 0.7802
+Best Optuna threshold (val): 0.6456
+Refit best AUC (val): 0.7993
+Refit best F1@thr (val): 0.5559 at thr=0.6232
+Best params:
+{
+  "lr": 0.00021138375920925744,
+  "weight_decay": 3.472500713701834e-05,
+  "dropout": 0.4345114483654927,
+  "batch_size": 32,
+  "d_model": 128,
+  "nhead": 8,
+  "layers": 1,
+  "ff": 256
+}
+Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/hemolysis/transformer_wt/best_model.pt
+========================================================================

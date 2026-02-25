@@ -1,22 +1,22 @@
 ========================================================================
 MODEL: xgb
-Best trial: 104
-Best F1 (val @ best-threshold): 0.4979
-Val AUC: 0.7605
-Val AP:  0.4341
-Best threshold (picked on val): 0.3090
+Best trial: 135
+Best F1 (val @ best-threshold): 0.5166
+Val AUC: 0.7649
+Val AP:  0.4568
+Best threshold (picked on val): 0.1776
 Model saved to: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/hemolysis/xgb_smiles/best_model.json
 Best params:
 {
-  "lambda": 0.011081378217580111,
-  "alpha": 0.0002032698026243195,
-  "colsample_bytree": 0.4333198460941081,
-  "subsample": 0.6530041187241027,
-  "learning_rate": 0.04131642602716226,
-  "max_depth": 3,
-  "min_child_weight": 87,
-  "gamma": 4.763280942714241,
-  "num_boost_round": 1085,
-  "early_stopping_rounds": 104
+  "lambda": 0.2129583517389384,
+  "alpha": 0.0001696794661498691,
+  "colsample_bytree": 0.9282061230803667,
+  "subsample": 0.8348731440190578,
+  "learning_rate": 0.03235118202220623,
+  "max_depth": 7,
+  "min_child_weight": 56,
+  "gamma": 1.87440696607201,
+  "num_boost_round": 970,
+  "early_stopping_rounds": 94
 }
 ========================================================================

@@ -1,0 +1,17 @@
+========================================================================
+MODEL: svm_gpu
+Best trial: 6
+Best F1 (val @ best-threshold): 0.4871
+Val AUC: 0.7458
+Val AP:  0.4338
+Best threshold (picked on val): 0.2014
+Model saved to: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/hemolysis/svm_gpu_smiles/best_model_cuml_svc.joblib
+Best params:
+{
+  "C": 2.4210955376276835,
+  "kernel": "linear",
+  "class_weight": null,
+  "max_iter": 2093,
+  "tol": 0.0029131530243637046
+}
+========================================================================

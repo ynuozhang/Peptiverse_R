@@ -1,0 +1,17 @@
+========================================================================
+MODEL: enet_gpu
+Best trial: 197
+Val Spearman rho (objective): 0.558387
+Val RMSE:                      1.364375
+Val MAE:                       0.857910
+Val R2:                        0.163261
+Model saved to:                /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/permeability_caco2/enet_gpu_smiles/best_model_cuml_enet.joblib
+Best params:
+{
+  "alpha": 0.03229607316651855,
+  "l1_ratio": 0.21057109329672588,
+  "max_iter": 7461,
+  "tol": 0.006698616670403985,
+  "selection": "cyclic"
+}
+========================================================================

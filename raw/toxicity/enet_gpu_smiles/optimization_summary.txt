@@ -1,0 +1,17 @@
+========================================================================
+MODEL: enet_gpu
+Best trial: 188
+Best F1 (val @ best-threshold): 0.8143
+Val AUC: 0.8736
+Val AP:  0.9084
+Best threshold (picked on val): 0.4066
+Model saved to: /scratch/pranamlab/tong/PeptiVerse/src/toxicity/enet/best_model_cuml_enet.joblib
+Best params:
+{
+  "C": 0.20027096047686646,
+  "l1_ratio": 0.6988456681549614,
+  "class_weight": null,
+  "max_iter": 2963,
+  "tol": 1.5862974198859693e-05
+}
+========================================================================

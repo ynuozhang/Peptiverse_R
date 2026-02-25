@@ -1,0 +1,27 @@
+{
+  "model": "xgb_reg",
+  "dataset_path": "/scratch/pranamlab/tong/data/halflife/halflife_embedding",
+  "target_col": "log_label",
+  "n_folds": 5,
+  "best_trial_number": 20,
+  "best_objective_cv_spearman": 0.5879000126060311,
+  "oof_metrics": {
+    "rmse": 1.0810768604278564,
+    "mae": 0.7866008281707764,
+    "r2": 0.2524225115776062,
+    "spearman_rho": 0.557870619380726
+  },
+  "model_path": "/scratch/pranamlab/tong/PeptiVerse/src/halflife/finetune_stability_xgb_log/best_model.json",
+  "best_params": {
+    "lambda": 0.0006291983667746282,
+    "alpha": 0.0820082035401697,
+    "gamma": 1.2243543209914751,
+    "max_depth": 3,
+    "min_child_weight": 1.7773959178614585,
+    "subsample": 0.568291807635477,
+    "colsample_bytree": 0.8597778117881122,
+    "learning_rate": 0.0512590763008084,
+    "num_boost_round": 1728,
+    "early_stopping_rounds": 121
+  }
+}

@@ -1,0 +1,18 @@
+========================================================================
+MODEL: svm_gpu
+Best trial: 183
+Best F1 (val @ best-threshold): 0.8366
+Val AUC: 0.8926
+Val AP:  0.9241
+Best threshold (picked on val): 0.3903
+Model saved to: /scratch/pranamlab/tong/PeptiVerse/src/toxicity/svm_gpu/best_model_cuml_svc.joblib
+Best params:
+{
+  "C": 1.861479433036235,
+  "kernel": "rbf",
+  "class_weight": null,
+  "max_iter": 4860,
+  "tol": 3.815239893932187e-05,
+  "gamma": 0.07785177750381975
+}
+========================================================================

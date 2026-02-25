@@ -1,0 +1,33 @@
+========================================================================
+MODEL: transformer
+Dataset: /scratch/pranamlab/tong/data/halflife/halflife_embedding_unpooled
+Target column: log_label
+CV folds: 5
+Optuna objective: spearman (direction=maximize)
+Best trial: 45
+OOF metrics:
+{
+  "rmse": 1.0389505624771118,
+  "mae": 0.722099244594574,
+  "r2": 0.30950748920440674,
+  "spearman_rho": 0.5818272477094295
+}
+OOF score (spearman): 0.581827
+Best params:
+{
+  "lr": 0.0003603824115240561,
+  "weight_decay": 2.9442493502916885e-09,
+  "dropout": 0.3851371373367485,
+  "batch_size": 16
+}
+Final refit epochs (all data): 15
+Saved final model: /scratch/pranamlab/tong/PeptiVerse/src/halflife/finetune_stability_transformer/final_model.pt
+Benchmark (final model on full data):
+{
+  "n_samples": 130,
+  "wall_time_s": 1.9577592574059963,
+  "throughput_samples_per_s": 66.40244427818372,
+  "gpu_ms_per_sample": 0.28296443315652703,
+  "gpu_peak_mem_MB": 77.5693359375
+}
+========================================================================

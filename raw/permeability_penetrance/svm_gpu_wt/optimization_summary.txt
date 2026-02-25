@@ -1,0 +1,17 @@
+========================================================================
+MODEL: svm
+Best trial: 186
+Best F1 (val @ best-threshold): 0.9291
+Val AUC: 0.9572
+Val AP:  0.9610
+Best threshold (picked on val): 0.5493
+Model saved to: ../../penn_work/peptiverse/permeability/svm_outputs/best_model.joblib
+Best params:
+{
+  "svm_kind": "svc",
+  "C": 2.376389235427316,
+  "kernel": "rbf",
+  "class_weight": "balanced",
+  "gamma": 0.37765852730364186
+}
+========================================================================

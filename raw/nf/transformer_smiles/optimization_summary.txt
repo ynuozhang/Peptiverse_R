@@ -1,0 +1,20 @@
+========================================================================
+MODEL: transformer
+Best Optuna F1 (objective): 0.7306
+Best Optuna AUC (val, recorded): 0.9345
+Best Optuna threshold (val): 0.6996
+Refit best AUC (val): 0.9359
+Refit best F1@thr (val): 0.7308 at thr=0.7807
+Best params:
+{
+  "lr": 2.017155369538656e-05,
+  "weight_decay": 1.0331427776118103e-07,
+  "dropout": 0.11312423795318066,
+  "batch_size": 64,
+  "d_model": 384,
+  "nhead": 8,
+  "layers": 3,
+  "ff": 1536
+}
+Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/nf/transformer_smiles_20/best_model.pt
+========================================================================

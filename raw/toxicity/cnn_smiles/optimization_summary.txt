@@ -1,0 +1,17 @@
+========================================================================
+MODEL: cnn
+Best Optuna AUC (objective): 0.8444
+Refit best AUC (val): 0.9040
+Refit best F1@thr (val): 0.8406 at thr=0.3262
+Best params:
+{
+  "lr": 0.00045843732775814654,
+  "weight_decay": 0.0047229299044940646,
+  "dropout": 0.15649177757001576,
+  "batch_size": 16,
+  "channels": 512,
+  "kernel": 3,
+  "layers": 1
+}
+Saved model: /scratch/pranamlab/tong/PeptiVerse/src/toxicity/cnn_50/best_model.pt
+========================================================================

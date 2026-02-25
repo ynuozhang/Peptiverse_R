@@ -1,0 +1,39 @@
+{
+  "n_samples": 130,
+  "wall_time_s": 1.9577592574059963,
+  "throughput_samples_per_s": 66.40244427818372,
+  "gpu_total_kernel_ms": 36.78537631034851,
+  "gpu_ms_per_sample": 0.28296443315652703,
+  "gpu_avg_ms_per_batch": 0.7357075262069702,
+  "gpu_peak_mem_MB": 77.5693359375,
+  "telemetry_pre": {
+    "cpu_freq_current_MHz": 982.5166071428574,
+    "cpu_freq_max_MHz": 4000.0,
+    "cpu_util_pct": 3.3,
+    "cpu_count_logical": 112,
+    "cpu_count_physical": 56,
+    "gpu_util_pct": 0,
+    "gpu_mem_util_pct": 0,
+    "gpu_mem_used_MB": 632.125,
+    "gpu_mem_total_MB": 49140.0,
+    "gpu_sm_clock_MHz": 210,
+    "gpu_mem_clock_MHz": 405,
+    "gpu_power_W": 22.729,
+    "gpu_temp_C": 29
+  },
+  "telemetry_post": {
+    "cpu_freq_current_MHz": 1050.1764910714287,
+    "cpu_freq_max_MHz": 4000.0,
+    "cpu_util_pct": 5.7,
+    "cpu_count_logical": 112,
+    "cpu_count_physical": 56,
+    "gpu_util_pct": 0,
+    "gpu_mem_util_pct": 0,
+    "gpu_mem_used_MB": 632.125,
+    "gpu_mem_total_MB": 49140.0,
+    "gpu_sm_clock_MHz": 210,
+    "gpu_mem_clock_MHz": 405,
+    "gpu_power_W": 22.767,
+    "gpu_temp_C": 29
+  }
+}

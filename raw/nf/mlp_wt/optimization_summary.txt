@@ -1,15 +1,17 @@
 ========================================================================
 MODEL: mlp
-Best Optuna AUC (objective): 0.7383
-Refit best AUC (val): 0.9367
-Refit best F1@thr (val): 0.7357 at thr=0.7039
+Best Optuna F1 (objective): 0.7388
+Best Optuna AUC (val, recorded): 0.9357
+Best Optuna threshold (val): 0.6202
+Refit best AUC (val): 0.9360
+Refit best F1@thr (val): 0.7315 at thr=0.5700
 Best params:
 {
-  "lr": 0.0024035413894026624,
-  "weight_decay": 0.005100535489624252,
-  "dropout": 0.08148793900260112,
+  "lr": 0.0007410387413034607,
+  "weight_decay": 2.0058462296632196e-05,
+  "dropout": 0.2128352902210342,
   "batch_size": 16,
   "hidden": 2048
 }
-Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/nf/mlp/best_model.pt
+Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/nf/mlp_wt/best_model.pt
 ========================================================================

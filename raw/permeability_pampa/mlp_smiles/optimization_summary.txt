@@ -1,0 +1,31 @@
+========================================================================
+MODEL: mlp
+OPTUNA objective: spearman (direction=maximize)
+Best trial: 142
+Best val metrics:
+{
+  "rmse": 1.1005154848098755,
+  "mae": 0.7258118391036987,
+  "r2": 0.035774409770965576,
+  "spearman_rho": 0.46381468365138856
+}
+Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/permeability_pampa/mlp_smiles/best_model.pt
+Best params:
+{
+  "lr": 0.0018544287222552573,
+  "weight_decay": 3.6326157858097132e-06,
+  "dropout": 0.05948653475637555,
+  "batch_size": 16,
+  "hidden": 256,
+  "loss": "huber",
+  "huber_delta": 1.1627253517561549
+}
+Benchmark (val):
+{
+  "n_samples": 800,
+  "wall_time_s": 4.320509211043827,
+  "throughput_samples_per_s": 185.1633594380699,
+  "gpu_ms_per_sample": 0.019861279986798763,
+  "gpu_peak_mem_MB": 30.75537109375
+}
+========================================================================

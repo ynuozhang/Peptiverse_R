@@ -1,0 +1,22 @@
+========================================================================
+MODEL: xgb
+Best trial: 174
+Best F1 (val @ best-threshold): 0.9027
+Val AUC: 0.9589
+Val AP:  0.9508
+Best threshold (picked on val): 0.4301
+Model saved to: ../../penn_work/peptiverse/permeability/best_model.json
+Best params:
+{
+  "lambda": 0.08227151654969715,
+  "alpha": 4.4983984860260543e-07,
+  "colsample_bytree": 0.9542242349712016,
+  "subsample": 0.7517528401884647,
+  "learning_rate": 0.01993310300825343,
+  "max_depth": 12,
+  "min_child_weight": 1,
+  "gamma": 1.8475635843939717,
+  "num_boost_round": 760,
+  "early_stopping_rounds": 186
+}
+========================================================================

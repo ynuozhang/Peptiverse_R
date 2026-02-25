@@ -1,0 +1,19 @@
+========================================================================
+MODEL: cnn
+Best Optuna F1 (objective): 0.7351
+Best Optuna AUC (val, recorded): 0.9349
+Best Optuna threshold (val): 0.7015
+Refit best AUC (val): 0.9370
+Refit best F1@thr (val): 0.7305 at thr=0.6828
+Best params:
+{
+  "lr": 0.0004941576397473323,
+  "weight_decay": 8.499399666787692e-05,
+  "dropout": 0.4950813852374845,
+  "batch_size": 16,
+  "channels": 128,
+  "kernel": 7,
+  "layers": 3
+}
+Saved model: /vast/projects/pranam/lab/yz927/projects/Classifier_Weight/training_classifiers/nf/cnn_smiles_20/best_model.pt
+========================================================================

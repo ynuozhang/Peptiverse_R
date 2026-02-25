@@ -1,0 +1,25 @@
+{
+  "n_samples": 465,
+  "wall_time_s": 1.4508731923997402,
+  "throughput_samples_per_s": 320.4966515584255,
+  "gpu_total_kernel_ms": 5.213824018836021,
+  "gpu_ms_per_sample": 0.01121252477169037,
+  "gpu_avg_ms_per_batch": 0.10427648037672042,
+  "gpu_peak_mem_MB": 102.32373046875,
+  "telemetry_pre": {
+    "cpu_freq_current_MHz": 2871.8869999999997,
+    "cpu_freq_max_MHz": 4100.0,
+    "cpu_util_pct": 34.8,
+    "cpu_count_logical": 32,
+    "cpu_count_physical": 16,
+    "gpu_stats_error": "No module named 'pynvml'"
+  },
+  "telemetry_post": {
+    "cpu_freq_current_MHz": 3379.5095624999994,
+    "cpu_freq_max_MHz": 4100.0,
+    "cpu_util_pct": 64.3,
+    "cpu_count_logical": 32,
+    "cpu_count_physical": 16,
+    "gpu_stats_error": "No module named 'pynvml'"
+  }
+}
