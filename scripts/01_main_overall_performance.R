@@ -11,9 +11,9 @@ suppressPackageStartupMessages({
   library(jsonlite)
 })
 
-# ============================================================
+# -------------------------
 # Configuration
-# ============================================================
+# -------------------------
 OUT_DIR   <- "figures/main"
 RAW_DIR   <- "raw"
 BA_CSV    <- "data_processed/binding_affinity_trials_long.csv"
@@ -24,10 +24,9 @@ dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
 PAPER_REG_TASKS <- c("halflife", "permeabilitypampa", "permeabilitycaco2")
 
-# ============================================================
+# -------------------------
 # Helper Functions
-# ============================================================
-
+# -------------------------
 read_csv_fast <- function(path) {
   data.table::fread(path, data.table = FALSE, showProgress = FALSE)
 }
@@ -169,9 +168,9 @@ ba_best <- readr::read_csv(BA_CSV, show_col_types = FALSE) %>%
 
 print(ba_best)
 
-# ============================================================
+# -------------------------
 # Read Trials Data
-# ============================================================
+# -------------------------
 
 read_trials_one <- function(path, kind_tag) {
   df <- readr::read_csv(path, show_col_types = FALSE)
@@ -210,9 +209,9 @@ read_trials_one <- function(path, kind_tag) {
 trials_cls <- read_trials_one(IN_TRIALS_CLS, "classifier")
 trials_reg <- read_trials_one(IN_TRIALS_REG, "regression")
 
-# ============================================================
+# -------------------------
 # Data Collection Functions
-# ============================================================
+# -------------------------
 
 spearman_from_predfile <- function(path) {
   d <- read_csv_fast(path)
@@ -512,9 +511,9 @@ best_model_per_task_all <- best_by_run_metric(trials_cls) %>%
   best_model_per_task() %>%
   bind_rows(best_reg)
 
-# ============================================================
+# -------------------------
 # Property Specification
-# ============================================================
+# -------------------------
 
 prop_spec <- tribble(
   ~prop,                      ~task_key,                 ~kind,          ~include_wt, ~include_smiles, ~placeholder_ok,
@@ -529,9 +528,9 @@ prop_spec <- tribble(
   "Binding Affinity",         "bindingaffinity",         "regression",    TRUE,        TRUE,            TRUE
 )
 
-# ============================================================
+# -------------------------
 # Build Panel Data
-# ============================================================
+# -------------------------
 
 build_panel_df <- function(repr_key, panel_label) {
   spec2 <- prop_spec %>%
@@ -612,10 +611,6 @@ df_smiles <- build_panel_df("smiles", "SMILES Predictors")
 plot_df <- bind_rows(df_wt, df_smiles) %>%
   mutate(panel = factor(panel, levels = c("Amino Acids Predictors", "SMILES Predictors")))
 
-# ============================================================
-# Panel-specific ordering
-# ============================================================
-
 order_wt <- c(
   "Hemolysis",
   "Non-Fouling",
@@ -635,9 +630,9 @@ order_smiles <- c(
   "Permeability (CACO2)"
 )
 
-# ============================================================
+# -------------------------
 # Prepare Plot Data
-# ============================================================
+# -------------------------
 
 # Dual-axis mapping
 rho_min <- 0
@@ -672,10 +667,6 @@ plot_df2 <- plot_df %>%
     x_key = factor(x_key, levels = x_levels),
     x_lab = as.character(prop)
   )
-
-# ============================================================
-# Create Plot
-# ============================================================
 
 PAL_KIND <- c(
   "classifier" = "#5dd8df",
@@ -714,10 +705,6 @@ p_main <- ggplot(plot_df2, aes(x = x_key, y = y_plot)) +
   theme(axis.text.x = element_text(angle = 35, hjust = 1, vjust = 1))
 
 print(p_main)
-
-# ============================================================
-# Save Output
-# ============================================================
 
 out_png <- file.path(OUT_DIR, "main_best_model_dualaxis_f1_rho.png")
 ggsave(out_png, p_main, width = 15, height = 6, dpi = 500)

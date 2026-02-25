@@ -151,9 +151,9 @@ make_scatter <- function(df, stats_df, facet_var = "panel") {
     )
 }
 
-# =========================================================
+# -------------------------
 # 1) BEST MODEL PER TASK×REPR from raw/**/val_predictions.csv
-# =========================================================
+# -------------------------
 val_files <- list.files(RAW_DIR, pattern = "val_predictions\\.csv$", recursive = TRUE, full.names = TRUE)
 
 val_meta <- purrr::map_dfr(val_files, function(f) {
@@ -236,9 +236,9 @@ best_stats <- best_runs %>%
   ) %>%
   select(panel, label)
 
-# =========================================================
+# -------------------------
 # 2) Binding affinity: separate WT and SMILES panels
-# =========================================================
+# -------------------------
 BA_VAL_SMI <- file.path("raw/binding_affinity", "wt_smiles_unpooled", "val_smiles_unpooled.csv")
 BA_VAL_WT  <- file.path("raw/binding_affinity", "wt_wt_unpooled",     "val_wt_unpooled.csv")
 
@@ -308,9 +308,9 @@ if (file.exists(BA_VAL_SMI)) {
   best_stats      <- bind_rows(best_stats,      res$st)
 }
 
-# =========================================================
+# -------------------------
 # 3) Half-life
-# =========================================================
+# -------------------------
 hl_wt_oof <- list.files(
   file.path(RAW_DIR, "half_life"),
   pattern = "^oof_predictions\\.csv$",
@@ -511,9 +511,9 @@ if (length(hl_sum_json) > 0) {
   message("No half-life SMILES cv_oof_summary.json found (skipping).")
 }
 
-# =========================================================
-# 4) Plot + save
-# =========================================================
+# -------------------------
+# 4) Plot
+# -------------------------
 panel_base <- function(p) stringr::str_replace(p, "\\nBest:.*$", "")
 
 panel_key <- function(p) {

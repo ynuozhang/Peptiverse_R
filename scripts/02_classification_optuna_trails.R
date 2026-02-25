@@ -190,7 +190,6 @@ out_png <- file.path(OUT_DIR, "supp_S1_f1_vs_trial.png")
 ggsave(out_png, p, width = 10, height =8, dpi = 300, device = ragg::agg_png)
 message("Saved: ", out_png)
 
-# Optional PDF for paper submission
 out_pdf <- file.path(OUT_DIR, "supp_S1_f1_vs_trial.pdf")
 ggsave(out_pdf, p, width = 20, height = 16)
 message("Saved: ", out_pdf)

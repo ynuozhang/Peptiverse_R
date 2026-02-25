@@ -228,9 +228,6 @@ p_big <- ggplot(metrics_plot_named, aes(x = metric, y = mean_plot, fill = model_
 
 print(p_big)
 
-# -------------------------
-# Save
-# -------------------------
 n_props <- dplyr::n_distinct(metrics_plot_named$prop)
 out_png <- file.path(OUT_DIR, "supp_all_tasks_per_metric_bars.png")
 out_pdf <- file.path(OUT_DIR, "supp_all_tasks_per_metric_bars.pdf")

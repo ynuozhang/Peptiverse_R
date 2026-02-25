@@ -337,7 +337,6 @@ print_continuous_distribution <- function(prop, csv, split_col, value_col) {
   invisible(NULL)
 }
 
-# ---- run prints ----
 purrr::pwalk(
   binary_jobs,
   \(prop, csv, split_col, label_col) print_binary_distribution(prop, csv, split_col, label_col)
