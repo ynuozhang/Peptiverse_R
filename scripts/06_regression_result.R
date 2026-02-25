@@ -133,9 +133,6 @@ compute_reg_metrics_from_val <- function(df, quiet = TRUE) {
   )
 }
 
-# -------------------------
-# Plot style: y_pred vs y_true with lm + stats text INCLUDING p-values
-# -------------------------
 make_scatter <- function(df, stats_df, facet_var = "panel") {
   ggplot(df, aes(x = y_true, y = y_pred)) +
     geom_point(shape = 16, color = "#dba5d6", alpha = 0.70, size = 2.0) +
@@ -156,7 +153,6 @@ make_scatter <- function(df, stats_df, facet_var = "panel") {
 
 # =========================================================
 # 1) BEST MODEL PER TASK×REPR from raw/**/val_predictions.csv
-#    (excluding binding affinity; we special-case it)
 # =========================================================
 val_files <- list.files(RAW_DIR, pattern = "val_predictions\\.csv$", recursive = TRUE, full.names = TRUE)
 
@@ -313,7 +309,7 @@ if (file.exists(BA_VAL_SMI)) {
 }
 
 # =========================================================
-# 2.5) Half-life: Process both WT and SMILES with p-values
+# 3) Half-life
 # =========================================================
 hl_wt_oof <- list.files(
   file.path(RAW_DIR, "half_life"),
@@ -516,7 +512,7 @@ if (length(hl_sum_json) > 0) {
 }
 
 # =========================================================
-# 3) Plot + save
+# 4) Plot + save
 # =========================================================
 panel_base <- function(p) stringr::str_replace(p, "\\nBest:.*$", "")
 
